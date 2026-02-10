@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
 
-client = genai.Client(api_key="AIzaSyATqhJdswZFswWleoePIBaJ96nLt04KYL8")
+client = genai.Client(api_key="")
 
 system_instruction = """
 
