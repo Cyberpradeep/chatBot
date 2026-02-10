@@ -1,0 +1,113 @@
+* {
+    font-family: monospace;
+}
+
+body {
+
+    padding: 10px;
+    background-image: url('/static/images/bg1.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.container {
+    max-width: 750px;
+    margin: auto;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    border-radius: 6px;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.display_conversation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 420px;
+    border: 1px solid rgb(163, 163, 163);
+    /* box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75); */
+    border-radius: 4px;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+p strong {
+    color: #000;
+}
+
+div {
+    padding-left: 15px;
+}
+
+form {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#bt {
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    border-radius: 4px;
+    background: black;
+    color: white;
+}
+
+input {
+    border: 1px solid black;
+    border-radius: 5px;
+    flex: 1;
+}
+
+input[type="text"] {
+    padding: 10px;
+}
+
+input:focus {
+    border-color: black;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+}
+
+#bt:hover {
+    background-color: whitesmoke;
+    color: black;
+    border: 1px solid black;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+}
+
+.you {
+    text-align: right;
+    align-self: flex-end;
+    max-width: 80%;
+    border: 1px solid black;
+    border-radius: 6px;
+    background-color: rgb(0, 0, 0);
+    color: white;
+    font-size: larger;
+    display: inline-block;
+    padding: 10px;
+}
+
+.coach {
+    text-align: left;
+    align-self: flex-start;
+    max-width: 80%;
+    border: 1px solid black;
+    border-radius: 6px;
+    background-color: rgb(253, 253, 253);
+    color: black;
+    font-size: larger;
+    display: inline-block;
+    padding: 10px;
+}
+#bt:disabled{
+    opacity: 0.7;
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>GenAI Coach</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>GENAI COACH</h1>
+        <div class="display_conversation" id="chat_area">
+            <!-- <p><strong>You:</strong> {{ user_prompt }}</p>
+            <p><strong>Coach:</strong> {{ chatbot_reply }}</p> -->
+            {%if not history%}
+            <p id="coach"><strong>Coach:</strong> Hello! I'm your GenAI Coach. Is your GenAI development going well?</p>
+
+            {% endif %}
+            {%for message in history%}
+            {% if message.role == 'user' %}
+            <p class="you"><strong style="color: white;">You:</strong> {{ message.parts[0].text }}</p>
+            {% else %}
+
+            <div class="coach">
+                <p><strong>Coach:</strong></p>{{ message.parts[0].text|safe }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <form method="POST" id="user_form">
+            <input type="text" name="user_prompt" id="user_prompt" placeholder="Type your message here..." required>
+            <button id="bt" type="submit">Send</button>
+        </form>
+    </div>
+</body>
+<script>
+    const chat_scroll = document.getElementById("chat_area");
+    const user_prompt = document.getElementById("user_prompt");
+    const form = document.getElementById("user_form");
+    const bt = document.getElementById("bt");
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const msg = user_prompt.value.trim();
+        if (!msg) {
+            return;
+        }
+        chat_scroll.innerHTML += `<p class="you"><strong style="color:white">You:</strong> ${msg}</p>`;
+        user_prompt.value = "";
+        bt.disabled = true;
+        bt.innerText = "Thinking...";
+        try {
+            const res = await fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_prompt: msg })
+            });
+            const data = await res.json();
+            chat_scroll.innerHTML += `<div class="coach"><p><strong>Coach:</strong></p>${data.chatbot_reply}</div>`;
+        } catch (err) {
+            console.error("Error:", err);
+            chat_scroll.innerHTML += `<div class="coach"><p><strong>Coach:</strong></p><span style="color:red;">Sorry, something went wrong. Please try again.</span></div>`;
+        }
+        bt.disabled = false;
+        bt.innerText = "Send";
+        chat_scroll.scrollTop = chat_scroll.scrollHeight;
+    }
+
+</script>
+
+</html>

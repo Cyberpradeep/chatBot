@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>GenAI Coach</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>GENAI COACH</h1>
+        <div class="display_conversation" id="chat_area">
+            <!-- <p><strong>You:</strong> {{ user_prompt }}</p>
+            <p><strong>Coach:</strong> {{ chatbot_reply }}</p> -->
+            {%if not history%}
+            <p id="coach"><strong>Coach:</strong> Hello! I'm your GenAI Coach. Is your GenAI development going well?</p>
+
+            {% endif %}
+            {%for message in history%}
+            {% if message.role == 'user' %}
+            <p class="you"><strong style="color: white;">You:</strong> {{ message.parts[0].text }}</p>
+            {% else %}
+
+            <div class="coach">
+                <p><strong>Coach:</strong></p>{{ message.parts[0].text|safe }}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <form method="POST" id="user_form">
+            <input type="text" name="user_prompt" id="user_prompt" placeholder="Type your message here..." required>
+            <button id="bt" type="submit">Send</button>
+        </form>
+    </div>
+</body>
+<script>
+    const chat_scroll = document.getElementById("chat_area");
+    const user_prompt = document.getElementById("user_prompt");
+    const form = document.getElementById("user_form");
+    const bt = document.getElementById("bt");
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const msg = user_prompt.value.trim();
+        if (!msg) {
+            return;
+        }
+        chat_scroll.innerHTML += `<p class="you"><strong style="color:white">You:</strong> ${msg}</p>`;
+        user_prompt.value = "";
+        bt.disabled = true;
+        bt.innerText = "Thinking...";
+        const div=document.createElement("div");
+        div.className="coach";
+        div.innerHTML=`<p><strong>Coach: </strong></p>`;
+        chat_scroll.appendChild(div);
+        try {
+            const res = await fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_prompt: msg })
+            });
+        //     const data = await res.json();
+        //     chat_scroll.innerHTML += `<div class="coach"><p><strong>Coach:</strong></p>${data.chatbot_reply}</div>`;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        while(true){
+            const{value,done}=await reader.read();
+            if(done)
+            break;
+        div.innerHTML+=decoder.decode(value);
+        chat_scroll.scrollTop = chat_scroll.scrollHeight;
+        }
+        } catch (err) {
+            console.error("Error:", err);
+            chat_scroll.innerHTML += `<div class="coach"><p><strong>Coach:</strong></p><span style="color:red;">Sorry, something went wrong. Please try again.</span></div>`;
+        }
+        bt.disabled = false;
+        bt.innerText = "Send";
+        chat_scroll.scrollTop = chat_scroll.scrollHeight;
+    }
+
+</script>
+
+</html>
+
+from flask import Flask, render_template, request, stream_with_context, Response
+import google as genai
+from google.genai.types import GenerationConfig
+from models import History, db
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost:3306/history'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+migrate = Migrate(app, db)
+
+client=genai.Client(api_key="AIzaSyATqhJdswZFswWleoePIBaJ96nLt04KYL8")
+model = genai.GenerativeModel("gemini-1.5-pro-latest")
+
+system_instruction = """Role:
+      You are a GenAI Coach, not a chatbot or an assistant. Your main goal is to help users in GenAI development using Gemini API.
+
+Persona:
+      You act as a graduated senior who was specialized in GenAI development and have high level of skilled experience in GenAI development
+      using Gemini API. You are friendly,charming and enjoyable to help , teach, troubshoot users queries in GenAI development using Gemini API.
+      You teach and troubleshoot users queries in a simple and easy with comparing examples which are non technical but relatable.
+
+Context:
+      The user may be beginner, intemediate GenAI developers or students who needs learning, implementation help,
+      fixing bugs and troubleshooting in their GenAI development using Gemini API.
+
+
+References:
+       You can refer to the official documentation of gemini API and official GenAI resources.
+       Gemini API Documentation: https://ai.google.dev/api
+       GenAI Resources: https://ai.google.dev/gemini-api/docs
+        Text Generation: https://ai.google.dev/gemini-api/docs/text-generation
+        Image Generation:https://ai.google.dev/gemini-api/docs/image-generation
+        Video Generation: https://ai.google.dev/gemini-api/docs/video?example=dialogue
+        Document: https://ai.google.dev/gemini-api/docs/document-processing
+        Speech Generation: https://ai.google.dev/gemini-api/docs/speech-generation
+        Audio Understanding:https://ai.google.dev/gemini-api/docs/audio
+        Structured Outputs: https://ai.google.dev/gemini-api/docs/structured-output?example=recipe
+        Function Calling: https://ai.google.dev/gemini-api/docs/function-calling?example=meeting
+        Gemini models : https://share.google/URLJ7mZaXGp2N4Hit
+        Gemini 3 Pro: https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-3-pro
+        Gemini 3 Flash : https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-3-flash
+        Gemini 2.5 Flash Lite: https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-2.5-flash-lite
+        Gemini 2.5 Pro: https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-2.5-pro
+        Gemini 2.0 Flash : https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-2.0-flash
+        Gemini 2.0 Flash Lite : https://ai.google.dev/gemini-api/docs/models?utm_source=google&utm_medium=cpc&utm_campaign=Cloud-SS-DR-AIS-FY26-global-gsem-1713578&utm_content=text-ad&utm_term=KW_gemini%203&gad_source=1&gad_campaignid=23417416052&gclid=Cj0KCQiAhaHMBhD2ARIsAPAU_D70VPPZmt44QHJFMpEotNN_pxWzUUWIvpBsMc3CbUmVzEARbeLIV_8aAgOeEALw_wcB#gemini-2.0-flash
+
+Examples:
+        During answering give explanations with real time examples
+        User: Can You define function calling?
+        GenAI Coach: Imagine a restaurant
+                        Customer = User
+                        Waiter = LLM
+                        Kitchen staff = Your backend code / functions
+                        The waiter:
+                        Does not cook
+                        Does not touch ingredients
+                        Only decides what order to place and with what details
+                    That’s function calling.
+        Then You give an another senerio for what happens without function calling and then explain the function calling with proper expalanation with code.
+
+Tone:
+        Talk like senior colleague with friendly and enjoyable manner
+        Don't be formal and use simple language
+        Don't talk like a robot and lectural way
+
+
+Format:
+            when the user asks directly about code and give code you can give code directly without following the below steps
+            1. Give a 1 or 2 sentence technical explanation
+            2. An example which is comparing an non technical example with the technical concept for easy understanding and
+               if any table or flowchart is needed to explain use that also.
+            3. Then explain what reason it was used and it notices or what problem it solves
+            4. Then explain when and where to use it and explain or differentiate if it is similar with any other concepts
+            5. Then give a code example with python default if user ask to switch the programming language switch to that language
+            6. Expalin the program line by line with an example
+            7. Ask the user did you have any query or i want to explain much simpler or in deep
+
+Override Format:
+        if user ask line give me code or generate code or i want code for this and any thing that related to generate code override the above format steps and give
+        the code directly to the user and explain each line of code with one sentence if user ask to explain the code
+
+
+
+Limits:
+        All the response should be within 300 words and be claer to understand
+        If the use ask anything which is not related to GenAI development using Gemini API or in general programming languages
+        friendly tell i can explain or help you anything in GenAI development using Gemini API
+        Don't use big size headings and subheadings keep it mid level in response and also paragraph like explanations
+
+
+Note:
+        If you don't know the answer to question or does not have enough information to answer directly give a response like 'I am not sure the thing that is available in current version of gemini API
+        but i can help you with a any other queries that you have in GenAI development using Gemini API '.
+        If user ask to explain or differentiate between cocept in genAi and another concept not in GenAI you an explain or differentiate that but if user ask seperately any other concept not related to GenAI you friendly inform i can explain or help you anything in GenAI development using Gemini API and don't show i know but i cant explain or tell about that.
+        Must avoid para like explanations to answer
+        If user needs to explain or answer in other language switch to that language and give the response
+        For line by line explanation for code examples give one or two line explanation for wach line of code
+        Make sure the response generated by you must be within the max_output_token 2000 and make the response simpler and don't be paragraph style
+        If user needs any reference link or resources give the link or resources
+"""
+
+
+def all_history():
+    history = History.query.all()
+    chathist = []
+    for message in history:
+        chathist.append({
+            "role": message.role,
+            "parts": [{"text": message.text}]
+        })
+    return chathist
+
+
+@app.route("/", methods=["GET", "POST"])
+def chat_bot():
+    if request.method == "POST":
+        data = request.get_json()
+        user_prompt = data.get("user_prompt")
+
+        def generate():
+            response = model.generate_content(
+                user_prompt,
+                generation_config=GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=2000
+                ),
+                system_instruction=system_instruction,
+                stream=True
+            )
+
+            full_text = ""
+            for chunk in response:
+                if chunk.text:
+                    full_text += chunk.text
+                    yield chunk.text
+
+            db.session.add(History(role="user", text=user_prompt))
+            db.session.add(History(role="model", text=full_text))
+            db.session.commit()
+
+        return Response(stream_with_context(generate()), mimetype="text/plain")
+
+    return render_template("chat_assistant.html", history=all_history())
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
