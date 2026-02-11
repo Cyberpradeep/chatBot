@@ -17,6 +17,10 @@ body {
     box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
     border-radius: 6px;
     padding: 20px;
+    background-image: url('/static/images/bg3.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+
 }
 
 h1 {
@@ -85,7 +89,6 @@ input:focus {
 }
 
 .you {
-    text-align: right;
     align-self: flex-end;
     max-width: 80%;
     border: 1px solid black;
@@ -106,7 +109,6 @@ input:focus {
     background-color: rgb(253, 253, 253);
     color: black;
     font-size: larger;
-    display: inline-block;
     padding: 10px;
 }
 #bt:disabled{
@@ -119,4 +121,16 @@ input:focus {
     border-radius: 6px;
     max-width: 15%;
     text-align: center;
+}
+.coach h1,.coach h2,.coach h3{
+    font-size: larger;
+    font-weight: bolder;
+}
+
+.code{
+    background-color: rgb(146, 146, 146);
+    color: white;
+    padding: 5px;
+    border-radius: 6px;
+    width: fit-content;
 }
