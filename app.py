@@ -154,12 +154,13 @@ def chat_bot():
             list_hist = ""
             try:
                 # cache=client.caches.create(
-                #     model="gemini-3-flash-preview",
+                #     model="gemini-2.5-pro",
                 #     config=types.CreateCachedContentConfig(
                 #         display_name="genai_cache",
                 #         system_instruction=system_instruction,
+                #         ttl="7200s",
                 #     ),
-                #     # ttl="7200s",
+                    
                 # )
 
 
