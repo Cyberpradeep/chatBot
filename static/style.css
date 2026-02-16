@@ -39,6 +39,7 @@ h1 {
     padding: 12px;
     overflow-y: scroll;
     overflow-x: hidden;
+    font-family: poppins, sans-serif;
 }
 
 p strong {
@@ -89,6 +90,7 @@ input:focus {
 }
 
 .you {
+    text-align: right;
     align-self: flex-end;
     max-width: 80%;
     border: 1px solid black;
@@ -104,9 +106,9 @@ input:focus {
     text-align: left;
     align-self: flex-start;
     max-width: 80%;
-    border: 1px solid black;
+    /* border: 1px solid black; */
     border-radius: 6px;
-    background-color: rgb(253, 253, 253);
+    /* background-color: rgb(253, 253, 253); */
     color: black;
     font-size: larger;
     padding: 10px;
@@ -133,4 +135,130 @@ input:focus {
     padding: 5px;
     border-radius: 6px;
     width: fit-content;
+    font-family: monospace;
+}
+.coach pre {
+    background: rgb(31, 31, 31);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: monospace;
+}
+
+.coach code {
+    font-family: monospace;
+    word-wrap: break-word;
+}
+.textStyle{
+    align-self: flex-end;
+    background-color: rgba(255, 255, 255, 0.75);
+    /* box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75); */
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    margin: 10px;
+    border: 1px solid rgb(186, 186, 186);
+    max-width: 80%;
+}
+.textStyle:hover{
+    border-color: black;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0px 0px 7px 1px rgba(0, 0, 0, 0.75);
+}
+.codeStyle{
+    position: relative;
+    max-width: 80%;
+    margin: 10px;
+}
+.copybt{
+    background-color: black;
+    color: white;
+    /* border: 1px solid whitesmoke; */
+    border: none;
+    border-radius: 6px;
+    padding:5px;
+    position:absolute;
+    top: 6px;
+    right: 10px;
+    box-shadow: inset 0px 0px 6px 1px rgba(255, 255, 255, 0.75);
+}
+
+.textContent {
+    color: #2d3748;
+}
+
+.explainStyle {
+    margin: 10px;
+    background-color: rgba(255, 255, 255, 0.75);
+    border-radius: 10px;
+    border: 1px solid rgb(186, 186, 186);
+    max-width: 80%  ;
+}
+
+.explainStyle:hover {
+    border-color: black;
+    box-shadow: 0px 0px 7px 1px rgba(0, 0, 0, 0.75);
+}
+.explainTopic {
+    background: linear-gradient(135deg, #000000, #a8a7a8);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.expandbt {
+    font-size: 18px;
+}
+
+.explainText {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.75);
+    border-bottom: 1px solid #c6c6c6;
+}
+.explaineg {
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.egdiv,.without,.flow,.code.cd_st {
+    padding: 14px 16px;
+    border-bottom: 1px solid #a8a8a8;
+}
+.egTitle,.withoutTitle,.flowTitle {
+    margin-bottom: 6px;
+    color: rgb(45, 45, 45);
+}
+
+.egContent,.withoutContent,.flowContent {
+    color: #4a5568;
+}
+
+.btexpand {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #000000, #4a5568);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.btexpand:hover {
+    background: #000000;
+    box-shadow: 0px 0px 7px 1px rgba(0, 0, 0, 0.75);
+}
+.codeTitle{
+    background-color:transparent;
+    color: white;
+    border: none;
+    padding: 5px;
+    /* box-shadow: inset 0px 0px 5px 0px rgba(255, 255, 255, 0.75); */
+    border-radius: 6px;
 }

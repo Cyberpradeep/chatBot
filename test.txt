@@ -366,3 +366,12 @@ input:focus {
     font-size: larger;
     font-weight: bolder;
 }
+
+
+
+
+ <div class="code cd_st">
+        <div class="codeTitle">Code Example:</div>
+        <button class="copybt" onclick="copy(this)">copy</button>
+        <pre><code>${code}</code></pre>
+        </div>
