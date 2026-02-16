@@ -6,7 +6,7 @@ from models import History, db
 from flask_migrate import Migrate
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost:3306/history'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://password_ussername/tablename'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate = Migrate(app, db)
